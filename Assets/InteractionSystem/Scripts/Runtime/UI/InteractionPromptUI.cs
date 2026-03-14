@@ -5,14 +5,12 @@ using TMPro;
 namespace InteractionSystem.Runtime
 {
     /// <summary>
-    /// Etkilesim prompt mesajini ve durum geri bildirimini yoneten UI bileşeni.
+    /// Etkilesim prompt mesajini ve durum geri bildirimini yoneten UI bileseni.
     /// InteractionDetector event'lerine abone olarak calisir.
     /// </summary>
     public class InteractionPromptUI : MonoBehaviour
     {
         #region Fields
-
-        private const float k_CannotInteractDisplayDuration = 1.5f;
 
         [Header("References")]
         [SerializeField] private InteractionDetector m_Detector;
@@ -22,7 +20,6 @@ namespace InteractionSystem.Runtime
         [SerializeField] private HoldProgressBarUI m_HoldProgressBar;
 
         private IInteractable m_LastTarget;
-        private float m_CannotInteractTimer;
 
         #endregion
 
@@ -62,7 +59,6 @@ namespace InteractionSystem.Runtime
         private void Update()
         {
             UpdatePromptText();
-            UpdateCannotInteractTimer();
         }
 
         #endregion
@@ -75,11 +71,14 @@ namespace InteractionSystem.Runtime
 
             if (target == null)
             {
-                HidePrompt();
+                HideAll();
                 return;
             }
 
-            ShowPrompt(target.GetPromptMessage());
+            if (m_PromptPanel != null)
+                m_PromptPanel.SetActive(true);
+
+            UpdatePromptText();
         }
 
         private void HandleHoldProgress(float progress)
@@ -102,6 +101,8 @@ namespace InteractionSystem.Runtime
         {
             if (m_HoldProgressBar != null)
                 m_HoldProgressBar.Hide();
+
+            UpdatePromptText();
         }
 
         private void UpdatePromptText()
@@ -110,77 +111,45 @@ namespace InteractionSystem.Runtime
                 return;
 
             string message = m_LastTarget.GetPromptMessage();
+            bool canInteract = m_LastTarget.CanInteract(m_Detector.gameObject);
 
-            if (!m_LastTarget.CanInteract(m_Detector.gameObject))
+            if (canInteract)
             {
-                ShowCannotInteract(message);
+                if (m_PromptText != null)
+                {
+                    m_PromptText.gameObject.SetActive(true);
+                    m_PromptText.text = message;
+                }
+
+                if (m_CannotInteractText != null)
+                    m_CannotInteractText.gameObject.SetActive(false);
             }
             else
             {
-                SetPromptText(message);
+                if (m_CannotInteractText != null)
+                {
+                    m_CannotInteractText.gameObject.SetActive(true);
+                    m_CannotInteractText.text = message;
+                }
+
+                if (m_PromptText != null)
+                    m_PromptText.gameObject.SetActive(false);
             }
-        }
-
-        private void UpdateCannotInteractTimer()
-        {
-            if (m_CannotInteractTimer <= 0f)
-                return;
-
-            m_CannotInteractTimer -= Time.deltaTime;
-
-            if (m_CannotInteractTimer <= 0f)
-            {
-                HideCannotInteract();
-            }
-        }
-
-        private void ShowPrompt(string message)
-        {
-            if (m_PromptPanel != null)
-                m_PromptPanel.SetActive(true);
-
-            SetPromptText(message);
-        }
-
-        private void HidePrompt()
-        {
-            if (m_PromptPanel != null)
-                m_PromptPanel.SetActive(false);
-
-            if (m_HoldProgressBar != null)
-                m_HoldProgressBar.Hide();
-        }
-
-        private void SetPromptText(string message)
-        {
-            if (m_PromptText != null)
-                m_PromptText.text = message;
-        }
-
-        /// <summary>
-        /// Etkilesim yapilamadiginda geri bildirim gosterir.
-        /// </summary>
-        /// <param name="message">Gosterilecek mesaj.</param>
-        public void ShowCannotInteract(string message)
-        {
-            if (m_CannotInteractText == null)
-                return;
-
-            m_CannotInteractText.text = message;
-            m_CannotInteractText.gameObject.SetActive(true);
-            m_CannotInteractTimer = k_CannotInteractDisplayDuration;
-        }
-
-        private void HideCannotInteract()
-        {
-            if (m_CannotInteractText != null)
-                m_CannotInteractText.gameObject.SetActive(false);
         }
 
         private void HideAll()
         {
-            HidePrompt();
-            HideCannotInteract();
+            if (m_PromptPanel != null)
+                m_PromptPanel.SetActive(false);
+
+            if (m_CannotInteractText != null)
+                m_CannotInteractText.gameObject.SetActive(false);
+
+            if (m_PromptText != null)
+                m_PromptText.gameObject.SetActive(true);
+
+            if (m_HoldProgressBar != null)
+                m_HoldProgressBar.Hide();
         }
 
         #endregion

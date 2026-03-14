@@ -1,13 +1,14 @@
 using System.Collections.Generic;
 
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 using TMPro;
 
 namespace InteractionSystem.Runtime
 {
     /// <summary>
-    /// Oyuncunun envanterindeki item'lari listeleyen basit UI bileşeni.
+    /// Oyuncunun envanterindeki item'lari listeleyen basit UI bileseni.
     /// PlayerInventory event'lerine abone olarak otomatik guncellenir.
     /// </summary>
     public class InventoryUI : MonoBehaviour
@@ -21,7 +22,7 @@ namespace InteractionSystem.Runtime
         [SerializeField] private GameObject m_ItemSlotPrefab;
 
         [Header("Settings")]
-        [SerializeField] private KeyCode m_ToggleKey = KeyCode.Tab;
+        [SerializeField] private Key m_ToggleKey = Key.Tab;
 
         private readonly List<GameObject> m_SpawnedSlots = new List<GameObject>();
         private bool m_IsVisible;
@@ -61,7 +62,11 @@ namespace InteractionSystem.Runtime
 
         private void Update()
         {
-            if (Input.GetKeyDown(m_ToggleKey))
+            var keyboard = Keyboard.current;
+            if (keyboard == null)
+                return;
+
+            if (keyboard[m_ToggleKey].wasPressedThisFrame)
             {
                 TogglePanel();
             }

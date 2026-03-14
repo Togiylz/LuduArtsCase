@@ -164,7 +164,14 @@ namespace InteractionSystem.Runtime
 
         bool IInteractable.CanInteract(GameObject interactor)
         {
-            return true;
+            if (!m_IsLocked)
+                return true;
+
+            var inventory = interactor.GetComponent<PlayerInventory>();
+            if (inventory == null)
+                return false;
+
+            return inventory.HasKeyOfType(m_RequiredKeyType);
         }
 
         void IInteractable.Interact(GameObject interactor)

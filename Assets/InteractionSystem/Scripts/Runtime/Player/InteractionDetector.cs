@@ -1,6 +1,7 @@
 using System;
 
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace InteractionSystem.Runtime
 {
@@ -20,7 +21,7 @@ namespace InteractionSystem.Runtime
         [SerializeField] private Transform m_RaycastOrigin;
 
         [Header("Input Settings")]
-        [SerializeField] private KeyCode m_InteractionKey = KeyCode.E;
+        [SerializeField] private Key m_InteractionKey = Key.E;
 
         private IInteractable m_CurrentTarget;
         private float m_HoldTimer;
@@ -143,14 +144,18 @@ namespace InteractionSystem.Runtime
             if (m_CurrentTarget == null)
                 return;
 
+            var keyboard = Keyboard.current;
+            if (keyboard == null)
+                return;
+
             switch (m_CurrentTarget.InteractionType)
             {
                 case InteractionType.Instant:
                 case InteractionType.Toggle:
-                    HandleInstantInput();
+                    HandleInstantInput(keyboard);
                     break;
                 case InteractionType.Hold:
-                    HandleHoldInput();
+                    HandleHoldInput(keyboard);
                     break;
                 default:
                     Debug.LogError($"[InteractionDetector] Unknown InteractionType: {m_CurrentTarget.InteractionType}");
@@ -158,17 +163,17 @@ namespace InteractionSystem.Runtime
             }
         }
 
-        private void HandleInstantInput()
+        private void HandleInstantInput(Keyboard keyboard)
         {
-            if (Input.GetKeyDown(m_InteractionKey))
+            if (keyboard[m_InteractionKey].wasPressedThisFrame)
             {
                 TryInteract();
             }
         }
 
-        private void HandleHoldInput()
+        private void HandleHoldInput(Keyboard keyboard)
         {
-            if (Input.GetKey(m_InteractionKey))
+            if (keyboard[m_InteractionKey].isPressed)
             {
                 if (!m_CurrentTarget.CanInteract(gameObject))
                 {
@@ -197,7 +202,7 @@ namespace InteractionSystem.Runtime
                     CancelHold();
                 }
             }
-            else if (Input.GetKeyUp(m_InteractionKey))
+            else if (keyboard[m_InteractionKey].wasReleasedThisFrame)
             {
                 CancelHold();
             }

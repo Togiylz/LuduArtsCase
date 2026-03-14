@@ -4,15 +4,15 @@ using UnityEngine.UI;
 namespace InteractionSystem.Runtime
 {
     /// <summary>
-    /// Hold tipi etkilesimler icin ilerleme cubugu UI bileşeni.
-    /// Fill amount ile 0-1 arasi ilerleme gosterir.
+    /// Hold tipi etkilesimler icin ilerleme cubugu UI bileseni.
+    /// Standart UI Slider kullanarak 0-1 arasi ilerleme gosterir.
     /// </summary>
     public class HoldProgressBarUI : MonoBehaviour
     {
         #region Fields
 
         [Header("References")]
-        [SerializeField] private Image m_FillImage;
+        [SerializeField] private Slider m_Slider;
         [SerializeField] private GameObject m_BarContainer;
 
         #endregion
@@ -21,9 +21,16 @@ namespace InteractionSystem.Runtime
 
         private void Awake()
         {
-            if (m_FillImage == null)
+            if (m_Slider == null)
             {
-                Debug.LogError("[HoldProgressBarUI] FillImage is not assigned!");
+                Debug.LogError("[HoldProgressBarUI] Slider is not assigned!");
+            }
+            else
+            {
+                m_Slider.interactable = false;
+                m_Slider.minValue = 0f;
+                m_Slider.maxValue = 1f;
+                m_Slider.value = 0f;
             }
 
             Hide();
@@ -39,10 +46,10 @@ namespace InteractionSystem.Runtime
         /// <param name="progress">0-1 arasi normalize ilerleme degeri.</param>
         public void SetProgress(float progress)
         {
-            if (m_FillImage == null)
+            if (m_Slider == null)
                 return;
 
-            m_FillImage.fillAmount = Mathf.Clamp01(progress);
+            m_Slider.value = Mathf.Clamp01(progress);
         }
 
         /// <summary>
