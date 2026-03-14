@@ -257,7 +257,7 @@ Hepsini ekle, sound sistemini profesyonel bir game developer gibi yaz
 - InteractionHighlight: Emission pulse efekti, MaterialPropertyBlock
 - InteractionSoundData/Player: ScriptableObject ses profilleri, AudioSource pooling,
   pitch variation, ayri loop source
-- InteractionSaveSystem: JSON + PlayerPrefs, SerializableDictionary
+- InteractionSaveSystem: JSON + PlayerPrefs (sonradan proje scope disinda kaldirildi)
 ```
 
 **Nasil Kullandim:**
@@ -269,6 +269,34 @@ Hepsini ekle, sound sistemini profesyonel bir game developer gibi yaz
 > Sound sistemi profesyonel: ScriptableObject tabanli ses profili,
 > rastgele clip secimi, pitch variation, ayri loop AudioSource.
 > Highlight MaterialPropertyBlock ile GC-free.
+> Save/Load sistemi implement edildi ancak case gereksinimleri icin gerekli olmadigindan kaldirildi.
+
+---
+
+## Prompt 10: Kapıların Sadece Şalter ile Açılması (OpenOnlyBySwitch)
+
+**Arac:** Cursor (Claude)
+**Tarih/Saat:** 2026-03-14 18:00
+
+**Prompt:**
+```
+son olarak bide kapıya sadece şalter ile açılmasını sağlayan kod ekle key kabul etmesin
+```
+
+**Alinan Cevap (Ozet):**
+```
+- Door script'ine `m_OpenOnlyBySwitch` eklendi.
+- Bu bool aktifken `CanInteract` her zaman false dönüyor, "Use Switch to Open" prompt'u veriyor.
+- `SetOpen` metodu kilitli olsa da şalter üzerinden tetiklendiğinde kapıyı açabiliyor.
+```
+
+**Nasil Kullandim:**
+- [x] Direkt kullandim
+- [ ] Adapte ettim
+- [ ] Reddettim
+
+**Aciklama:**
+> Bazı kapıların sadece şalterlerle kontrol edilebilmesi için eklendi. Etkileşimi tamamen kapatıp sadece event tetiklemesine izin veren güzel bir çözüm oldu.
 
 ---
 

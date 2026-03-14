@@ -118,6 +118,7 @@ GameObject:
   m_Component:
   - component: {fileID: 671468462728659585}
   - component: {fileID: 7100722181960746461}
+  - component: {fileID: 8475583533294857273}
   m_Layer: 0
   m_Name: P_Key_Red
   m_TagString: Untagged
@@ -157,3 +158,19 @@ MonoBehaviour:
   m_RotateSpeed: 90
   m_BobSpeed: 2
   m_BobHeight: 0.15
+--- !u!114 &8475583533294857273
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4809803806282831301}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5e9284448a0aca47a6af1493dd48929, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_HighlightColor: {r: 1, g: 0.8, b: 0.3, a: 1}
+  m_EmissionIntensity: 0.5
+  m_PulseSpeed: 2
+  m_Renderers: []

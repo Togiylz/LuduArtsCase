@@ -23,6 +23,10 @@ namespace InteractionSystem.Runtime
         [SerializeField] private KeyType m_RequiredKeyType;
         [SerializeField] private bool m_ConsumeKeyOnUnlock = true;
 
+        [Header("Switch Only")]
+        [Tooltip("True ise kapi sadece Switch/Lever ile acilir. Anahtar ve E tusu calismaz.")]
+        [SerializeField] private bool m_OpenOnlyBySwitch;
+
         private bool m_IsOpen;
         private Quaternion m_ClosedRotation;
         private Quaternion m_OpenRotation;
@@ -107,7 +111,7 @@ namespace InteractionSystem.Runtime
         /// <param name="open">True ise ac, false ise kapa.</param>
         public void SetOpen(bool open)
         {
-            if (m_IsLocked)
+            if (m_IsLocked && !m_OpenOnlyBySwitch)
             {
                 Debug.LogWarning($"[Door] {gameObject.name} is locked, cannot set state.");
                 return;
@@ -173,6 +177,9 @@ namespace InteractionSystem.Runtime
 
         bool IInteractable.CanInteract(GameObject interactor)
         {
+            if (m_OpenOnlyBySwitch)
+                return false;
+
             if (!m_IsLocked)
                 return true;
 
@@ -185,11 +192,17 @@ namespace InteractionSystem.Runtime
 
         void IInteractable.Interact(GameObject interactor)
         {
+            if (m_OpenOnlyBySwitch)
+                return;
+
             Toggle(interactor);
         }
 
         string IInteractable.GetPromptMessage()
         {
+            if (m_OpenOnlyBySwitch)
+                return "Use Switch to Open";
+
             if (m_IsLocked)
                 return $"Locked - {m_RequiredKeyType} Key Required";
 

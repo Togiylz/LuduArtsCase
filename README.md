@@ -90,7 +90,6 @@ PlayerInventory (ScriptableObject tabanli)
 Bonus Sistemler:
     |-- InteractionHighlight  : Emission pulse efekti
     |-- InteractionSoundPlayer: ScriptableObject ses profilleri
-    |-- InteractionSaveSystem : JSON + PlayerPrefs
 ```
 
 **Neden bu yapiyi sectim:**
@@ -103,7 +102,6 @@ Bonus Sistemler:
 **Trade-off'lar:**
 - SphereCast her frame calisir ama tek ray, dusuk maliyet
 - MaterialPropertyBlock ile highlight: GC allocation yok, performansli
-- PlayerPrefs save: Basit ama buyuk veriler icin uygun degil
 
 ### Kullanilan Design Patterns
 
@@ -111,8 +109,7 @@ Bonus Sistemler:
 |---------|---------------|-------|
 | Observer | Event system (OnTargetChanged, OnItemAdded vb.) | Loose coupling |
 | Strategy | InteractionType (Instant/Hold/Toggle) | Farkli davranislar |
-| Singleton | InteractionSaveSystem | Global erisim |
-| Component | Highlight, SoundPlayer, SaveSystem | Modularite |
+| Component | Highlight, SoundPlayer | Modularite |
 
 ---
 
@@ -123,7 +120,7 @@ Bonus Sistemler:
 | Kural | Uygulandi | Notlar |
 |-------|-----------|--------|
 | m_ prefix (private fields) | [x] | Tum private field'lar |
-| s_ prefix (private static) | [x] | InteractionSaveSystem.s_Instance |
+| s_ prefix (private static) | [x] | Bu projede kullanilmiyor |
 | k_ prefix (private const) | [x] | k_SphereCastRadius, k_RotationSpeed vb. |
 | Region kullanimi | [x] | Fields > Events > Properties > Unity Methods > Methods > Interface Impl |
 | Region sirasi dogru | [x] | Standart siralama |
@@ -148,7 +145,9 @@ Bonus Sistemler:
 | Collider tercihi | [x] | Box Collider kullanildi |
 | Hierarchy yapisi | [x] | Root > Pivot > Visual |
 
----
+
+### Zorlandığım Noktalar
+> [Çok komplike bir sistem yapmadığım için zorlandığım bir alan olmadı]
 
 ## Tamamlanan Ozellikler
 
@@ -183,14 +182,38 @@ Bonus Sistemler:
 
 ### Bonus (Nice to Have)
 
-- [x] Animation entegrasyonu (+3) - Kapi rotasyon, sandik kapak, lever hareket
-- [x] Sound effects integration (+2) - ScriptableObject tabanli ses profilleri
-- [x] Multiple keys / color-coded (+2) - Red, Blue, Gold key turleri
-- [x] Interaction highlight (+3) - Emission pulse efekti
-- [x] Save/Load states (+3) - JSON + PlayerPrefs
-- [x] Chained interactions (+2) - Switch -> Door UnityEvent baglantisi
+- [x] Animation entegrasyonu  - Kapi rotasyon, sandik kapak, lever hareket
+- [x] Sound effects integration  - ScriptableObject tabanli ses profilleri
+- [x] Multiple keys / color-coded  - Red, Blue, Gold key turleri
+- [x] Interaction highlight  - Emission pulse efekti
+- [x] Chained interactions  - Switch -> Door UnityEvent baglantisi
 
 ---
+## Bilinen Limitasyonlar
+
+### Tamamlanamayan Özellikler
+1. [Seve sistemi] - [Normalde playerpref e ya da json dosyası olarak verileri saklayabilrdim ama sistemde buna ihtiyaç duyan bir yapı olmadığı için yapmadım]
+2. [Çevre tasarımı] - [Case çalışmasının bununla alakalı bir isteğini görmedim]
+
+
+
+### Iyilestirme Onerileri
+- Envanter sistemi stack/miktar destegi eklenebilir
+- Object pooling ile pickup nesneleri optimize edilebilir
+- Highlight icin outline shader daha iyi gorsel sonuc verir
+- Fps kamerası daha da geliştirile bilir ve yürürekn koşarken daha iyi hissedilmesi sağlana bilir
+
+## Ekstra Özellikler
+
+Zorunlu gereksinimlerin dışında eklediklerim:
+
+1. Open Only By Switch (Sadece şalter ile açılan kapı)
+Açıklama: Door component’inde "Open Only By Switch" ile kapı sadece Switch/Lever’ın SetOpen(bool) çağrısı ile açılır. Oyuncu E tuşu veya anahtar kullanamaz. Görünen mesaj: "Use Switch to Open".
+Neden ekledim: Elektrikli kapı, uzaktan kumandalı kapı gibi farklı kapı tipleri için esneklik sağlamak. Case’de switch–door bağlantısı vardı, bu da ek bir kapı modu olarak eklendi.
+
+2. Inventory Item Icons
+Açıklama: Envanter listesinde her item’ın ScriptableObject’teki Icon sprite’ı gösterilir. InventorySlotUI bileşeni Image + TextMeshPro ile ikon ve isim gösterir.
+Neden ekledim: Basit liste yerine görsel geri bildirim ve daha iyi kullanıcı deneyimi sağlamak. ItemData / KeyItemData üzerindeki mevcut Icon alanı kullanılıyor.
 
 ## Dosya Yapisi
 
@@ -207,8 +230,7 @@ Assets/
 │   │   │   │   ├── KeyItemData.cs
 │   │   │   │   ├── InteractionHighlight.cs
 │   │   │   │   ├── InteractionSoundData.cs
-│   │   │   │   ├── InteractionSoundPlayer.cs
-│   │   │   │   └── InteractionSaveSystem.cs
+│   │   │   │   └── InteractionSoundPlayer.cs
 │   │   │   ├── Interactables/
 │   │   │   │   ├── Door.cs
 │   │   │   │   ├── KeyPickup.cs
@@ -242,14 +264,16 @@ PROMPTS.md
 ```
 
 ---
+## İletişim
 
-## Bilinen Limitasyonlar
+| Bilgi | Değer |
+|-------|-------|
+| Ad Soyad | [Tolga Yıldız] |
+| E-posta | [email@
+example.com] |
+| LinkedIn | [profil linki] |
+| GitHub | [github.com/username] |
 
-### Iyilestirme Onerileri
-- Save sistemi PlayerPrefs yerine dosya tabanli olabilir
-- Envanter sistemi stack/miktar destegi eklenebilir
-- Object pooling ile pickup nesneleri optimize edilebilir
-- Highlight icin outline shader daha iyi gorsel sonuc verir
 
 ---
 
