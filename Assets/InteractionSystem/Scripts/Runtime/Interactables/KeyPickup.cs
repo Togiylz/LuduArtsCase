@@ -21,6 +21,8 @@ namespace InteractionSystem.Runtime
         private Vector3 m_StartPosition;
         private bool m_IsFocused;
         private bool m_IsCollected;
+        private InteractionHighlight m_Highlight;
+        private InteractionSoundPlayer m_SoundPlayer;
 
         #endregion
 
@@ -37,6 +39,9 @@ namespace InteractionSystem.Runtime
 
         private void Awake()
         {
+            m_Highlight = GetComponent<InteractionHighlight>();
+            m_SoundPlayer = GetComponent<InteractionSoundPlayer>();
+
             if (m_KeyData == null)
             {
                 Debug.LogError($"[KeyPickup] {gameObject.name}: KeyData is not assigned!");
@@ -78,6 +83,9 @@ namespace InteractionSystem.Runtime
             }
 
             m_IsCollected = true;
+
+            if (m_SoundPlayer != null) m_SoundPlayer.PlayInteract();
+
             inventory.AddItem(m_KeyData);
             Debug.Log($"[KeyPickup] {m_KeyData.ItemName} collected by {interactor.name}.");
 
@@ -122,11 +130,14 @@ namespace InteractionSystem.Runtime
         void IInteractable.OnFocusBegin()
         {
             m_IsFocused = true;
+            if (m_Highlight != null) m_Highlight.SetHighlight(true);
+            if (m_SoundPlayer != null) m_SoundPlayer.PlayFocus();
         }
 
         void IInteractable.OnFocusEnd()
         {
             m_IsFocused = false;
+            if (m_Highlight != null) m_Highlight.SetHighlight(false);
         }
 
         #endregion

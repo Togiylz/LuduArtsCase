@@ -28,6 +28,8 @@ namespace InteractionSystem.Runtime
         private Quaternion m_OpenRotation;
         private Quaternion m_TargetRotation;
         private bool m_IsFocused;
+        private InteractionHighlight m_Highlight;
+        private InteractionSoundPlayer m_SoundPlayer;
 
         #endregion
 
@@ -63,6 +65,9 @@ namespace InteractionSystem.Runtime
 
         private void Awake()
         {
+            m_Highlight = GetComponent<InteractionHighlight>();
+            m_SoundPlayer = GetComponent<InteractionSoundPlayer>();
+
             if (m_Pivot == null)
                 m_Pivot = transform;
 
@@ -125,6 +130,7 @@ namespace InteractionSystem.Runtime
                 }
                 else
                 {
+                    if (m_SoundPlayer != null) m_SoundPlayer.PlayDenied();
                     Debug.Log($"[Door] {gameObject.name} is locked. Requires {m_RequiredKeyType} key.");
                     return;
                 }
@@ -133,6 +139,9 @@ namespace InteractionSystem.Runtime
             m_IsOpen = !m_IsOpen;
             m_TargetRotation = m_IsOpen ? m_OpenRotation : m_ClosedRotation;
             OnDoorStateChanged?.Invoke(m_IsOpen);
+
+            if (m_SoundPlayer != null) m_SoundPlayer.PlayInteract();
+
             Debug.Log($"[Door] {gameObject.name} is now {(m_IsOpen ? "open" : "closed")}.");
         }
 
@@ -190,11 +199,14 @@ namespace InteractionSystem.Runtime
         void IInteractable.OnFocusBegin()
         {
             m_IsFocused = true;
+            if (m_Highlight != null) m_Highlight.SetHighlight(true);
+            if (m_SoundPlayer != null) m_SoundPlayer.PlayFocus();
         }
 
         void IInteractable.OnFocusEnd()
         {
             m_IsFocused = false;
+            if (m_Highlight != null) m_Highlight.SetHighlight(false);
         }
 
         #endregion

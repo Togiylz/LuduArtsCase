@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-using TMPro;
-
 namespace InteractionSystem.Runtime
 {
     /// <summary>
-    /// Oyuncunun envanterindeki item'lari listeleyen basit UI bileseni.
+    /// Oyuncunun envanterindeki item'lari ikon ve isimle listeleyen UI bileseni.
     /// PlayerInventory event'lerine abone olarak otomatik guncellenir.
     /// </summary>
     public class InventoryUI : MonoBehaviour
@@ -78,7 +76,8 @@ namespace InteractionSystem.Runtime
 
         private void HandleItemChanged(ItemData item)
         {
-            RefreshList();
+            if (m_IsVisible)
+                RefreshList();
         }
 
         private void TogglePanel()
@@ -102,10 +101,16 @@ namespace InteractionSystem.Runtime
             foreach (var item in m_Inventory.Items)
             {
                 var slotObj = Instantiate(m_ItemSlotPrefab, m_ItemListParent);
-                var slotText = slotObj.GetComponentInChildren<TextMeshProUGUI>();
+                var slotUI = slotObj.GetComponent<InventorySlotUI>();
 
-                if (slotText != null)
-                    slotText.text = item.ItemName;
+                if (slotUI != null)
+                {
+                    slotUI.Setup(item);
+                }
+                else
+                {
+                    Debug.LogWarning("[InventoryUI] ItemSlotPrefab does not have InventorySlotUI component!");
+                }
 
                 m_SpawnedSlots.Add(slotObj);
             }

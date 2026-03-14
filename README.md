@@ -8,8 +8,7 @@
 |-------|-------|
 | Unity Versiyonu | 6000.0.68f1 (Unity 6) |
 | Render Pipeline | URP (Universal Render Pipeline) |
-| Case Suresi | 12 saat |
-| Tamamlanma Orani | %0 (baslangic) |
+| Input System | New Input System (com.unity.inputsystem 1.18.0) |
 
 ---
 
@@ -35,28 +34,36 @@ git clone https://github.com/[username]/LuduArtsCase.git
 | WASD | Hareket |
 | Mouse | Bakis yonu |
 | E | Etkilesim (Instant / Toggle) |
-| E (basili tut) | Hold etkilesim |
+| E (basili tut) | Hold etkilesim (Chest) |
+| Tab | Envanter ac/kapa |
 
 ### Test Senaryolari
 
 1. **Door Test:**
    - Kapiya yaklasin, "Press E to Open" mesajini gorun
-   - E'ye basin, kapi acilsin
+   - E'ye basin, kapi menteseden acilsin
    - Tekrar basin, kapi kapansin
 
 2. **Key + Locked Door Test:**
-   - Kilitli kapiya yaklasin, "Locked - Key Required" mesajini gorun
-   - Anahtari bulun ve toplayin
-   - Kilitli kapiya geri donun, simdi acilabilir olmali
+   - Kilitli kapiya yaklasin, kirmizi "Locked - Red Key Required" mesajini gorun
+   - Anahtari bulun ve E ile toplayin
+   - Tab ile envanterde gorundugundan emin olun (ikon + isim)
+   - Kilitli kapiya geri donun, simdi acilabilir
 
-3. **Switch Test:**
-   - Switch'e yaklasin ve aktive edin
-   - Bagli nesnenin (kapi) tetiklendigini gorun
+3. **Switch -> Door Test:**
+   - Switch'e yaklasin ve E ile aktive edin
+   - Bagli kapinin otomatik acildigini gorun
+   - Tekrar E ile deaktive edin, kapi kapansin
 
 4. **Chest Test:**
-   - Sandiga yaklasin
-   - E'ye basili tutun, progress bar dolsun
-   - Sandik acilsin ve icindeki item alinsin
+   - Sandiga yaklasin, "Hold E to Open (2s)" mesajini gorun
+   - E'ye basili tutun, slider dolsun
+   - Sandik acilsin ve icindeki item envantere eklensin
+   - Tekrar deneyince "Already Opened" mesaji gorun
+
+5. **Out of Range Test:**
+   - Uzaktan bir nesneye bakin, "Too Far" mesajini gorun
+   - Yaklastikca normal prompt'a gectigini gorun
 
 ---
 
@@ -65,62 +72,47 @@ git clone https://github.com/[username]/LuduArtsCase.git
 ### Interaction System Yapisi
 
 ```
-InteractionDetector (Player uzerinde)
+InteractionDetector (Player - SphereCast)
+    |-- IInteractable tespit (menzil ici + menzil disi)
+    |-- Input handling (Instant/Hold/Toggle)
+    |-- Event-driven UI bildirimi
     |
-    |-- Raycast ile IInteractable tespit
-    |-- En yakin IInteractable secimi
-    |-- Input'a gore Interact() cagrisi
-    |
-IInteractable (Interface)
-    |
-    |-- InteractionType (Instant / Hold / Toggle)
-    |-- Interact(), GetPromptMessage(), CanInteract()
-    |
-    +-- Door : MonoBehaviour, IInteractable (Toggle)
-    +-- KeyPickup : MonoBehaviour, IInteractable (Instant)
-    +-- Switch : MonoBehaviour, IInteractable (Toggle)
-    +-- Chest : MonoBehaviour, IInteractable (Hold)
+IInteractable (Interface - explicit impl.)
+    |-- Door     : Toggle, locked/unlocked, key kontrolu
+    |-- KeyPickup: Instant, envantere ekleme
+    |-- Switch   : Toggle, UnityEvent baglanti
+    |-- Chest    : Hold, tek kullanimlik
 
-PlayerInventory (Player uzerinde)
-    |
-    |-- List<ItemData> - toplanan item'lar
-    |-- HasKey(KeyType) kontrolu
-    |
-ItemData (ScriptableObject)
-    |
-    |-- Item tanimlari (isim, ikon, tur)
-    |-- KeyItemData : ItemData (anahtar turu)
+PlayerInventory (ScriptableObject tabanli)
+    |-- ItemData / KeyItemData
+    |-- HasKeyOfType(), UseKey()
 
-InteractionPromptUI (UI)
-    |
-    |-- Prompt mesaji gosterimi
-    |-- Hold progress bar
-    |-- Cannot interact feedback
+Bonus Sistemler:
+    |-- InteractionHighlight  : Emission pulse efekti
+    |-- InteractionSoundPlayer: ScriptableObject ses profilleri
+    |-- InteractionSaveSystem : JSON + PlayerPrefs
 ```
 
 **Neden bu yapiyi sectim:**
-> Interface-based tasarim ile her interactable bagimsiz olarak implement edilebilir.
-> Raycast-based detection, trigger-based'e gore daha hassas kontrol saglar ve
-> oyuncunun bakis yonundeki nesneyi secmesi icin idealdir.
-> ScriptableObject ile item tanimlari data-driven olarak yonetilebilir.
-
-**Alternatifler:**
-> - Trigger-based detection: Daha basit ama bakis yonunu dikkate almaz
-> - Abstract base class: Interface yerine kullanilabilirdi ama MonoBehaviour inheritance zaten var
-> - Event-driven detection: Performans icin iyi ama basit case icin overengineering
+- Interface-based tasarim: Her interactable bagimsiz, SOLID uyumlu
+- SphereCast: Raycast'tan daha toleransli, FPS icin ideal
+- Explicit interface impl.: Ludu Arts standardi, encapsulation
+- ScriptableObject item/sound: Data-driven, Inspector-friendly
+- Event-driven UI: Loose coupling, performansli
 
 **Trade-off'lar:**
-> - Raycast her frame calisir ama sadece tek ray oldugu icin performans maliyeti dusuk
-> - Interface kullanmak explicit implementation gerektirir (Ludu Arts standardi)
-> - ScriptableObject item sistemi basit ama genisletilebilir
+- SphereCast her frame calisir ama tek ray, dusuk maliyet
+- MaterialPropertyBlock ile highlight: GC allocation yok, performansli
+- PlayerPrefs save: Basit ama buyuk veriler icin uygun degil
 
 ### Kullanilan Design Patterns
 
 | Pattern | Kullanim Yeri | Neden |
 |---------|---------------|-------|
-| Observer | Event system (OnInteracted, OnItemCollected) | Loose coupling |
-| Strategy | InteractionType (Instant/Hold/Toggle) | Farkli etkilesim davranislari |
-| Singleton | InteractionPromptUI | Tek UI instance |
+| Observer | Event system (OnTargetChanged, OnItemAdded vb.) | Loose coupling |
+| Strategy | InteractionType (Instant/Hold/Toggle) | Farkli davranislar |
+| Singleton | InteractionSaveSystem | Global erisim |
+| Component | Highlight, SoundPlayer, SaveSystem | Modularite |
 
 ---
 
@@ -131,30 +123,30 @@ InteractionPromptUI (UI)
 | Kural | Uygulandi | Notlar |
 |-------|-----------|--------|
 | m_ prefix (private fields) | [x] | Tum private field'lar |
-| s_ prefix (private static) | [x] | Static field'lar |
-| k_ prefix (private const) | [x] | Constant degerler |
-| Region kullanimi | [x] | Standart siralama |
-| Region sirasi dogru | [x] | Fields > Events > Properties > Unity Methods > Methods > Interface Impl |
+| s_ prefix (private static) | [x] | InteractionSaveSystem.s_Instance |
+| k_ prefix (private const) | [x] | k_SphereCastRadius, k_RotationSpeed vb. |
+| Region kullanimi | [x] | Fields > Events > Properties > Unity Methods > Methods > Interface Impl |
+| Region sirasi dogru | [x] | Standart siralama |
 | XML documentation | [x] | Tum public API'ler |
-| Silent bypass yok | [x] | Hatalar loglaniyor |
-| Explicit interface impl. | [x] | IInteractable |
+| Silent bypass yok | [x] | Debug.LogError/LogWarning ile loglama |
+| Explicit interface impl. | [x] | IInteractable tum nesnelerde |
 
 ### Naming Convention
 
 | Kural | Uygulandi | Ornekler |
 |-------|-----------|----------|
 | P_ prefix (Prefab) | [x] | P_Door, P_Chest, P_Switch, P_Key |
-| M_ prefix (Material) | [x] | M_Door, M_Chest |
-| SO isimlendirme | [x] | ItemData, KeyItemData |
+| M_ prefix (Material) | [x] | M_Door, M_Key_Red, M_Key_Blue |
+| SO isimlendirme | [x] | ItemData, KeyItemData, InteractionSoundData |
 
 ### Prefab Kurallari
 
 | Kural | Uygulandi | Notlar |
 |-------|-----------|--------|
-| Transform (0,0,0) | [x] | |
-| Pivot bottom-center | [x] | |
-| Collider tercihi | [x] | Box > Capsule > Mesh |
-| Hierarchy yapisi | [x] | Root > Visual > Colliders |
+| Transform (0,0,0) | [x] | Tum prefab'lar |
+| Pivot dogru | [x] | Kapi mentesede, sandik kapak arkada |
+| Collider tercihi | [x] | Box Collider kullanildi |
+| Hierarchy yapisi | [x] | Root > Pivot > Visual |
 
 ---
 
@@ -162,53 +154,41 @@ InteractionPromptUI (UI)
 
 ### Zorunlu (Must Have)
 
-- [ ] Core Interaction System
-  - [ ] IInteractable interface
-  - [ ] InteractionDetector
-  - [ ] Range kontrolu
+- [x] Core Interaction System
+  - [x] IInteractable interface
+  - [x] InteractionDetector (SphereCast)
+  - [x] Range kontrolu + Out of Range feedback
 
-- [ ] Interaction Types
-  - [ ] Instant
-  - [ ] Hold
-  - [ ] Toggle
+- [x] Interaction Types
+  - [x] Instant
+  - [x] Hold
+  - [x] Toggle
 
-- [ ] Interactable Objects
-  - [ ] Door (locked/unlocked)
-  - [ ] Key Pickup
-  - [ ] Switch/Lever
-  - [ ] Chest/Container
+- [x] Interactable Objects
+  - [x] Door (locked/unlocked, key ile acma)
+  - [x] Key Pickup (2 tip: Red, Blue)
+  - [x] Switch/Lever (UnityEvent ile kapi baglantisi)
+  - [x] Chest/Container (2sn hold, tek kullanimlik)
 
-- [ ] UI Feedback
-  - [ ] Interaction prompt
-  - [ ] Dynamic text
-  - [ ] Hold progress bar
-  - [ ] Cannot interact feedback
+- [x] UI Feedback
+  - [x] Interaction prompt (dinamik text)
+  - [x] Hold progress bar (Slider)
+  - [x] Out of Range feedback
+  - [x] Cannot interact feedback (kirmizi text)
 
-- [ ] Simple Inventory
-  - [ ] Key toplama
-  - [ ] UI listesi
+- [x] Simple Inventory
+  - [x] Key toplama ve saklama
+  - [x] UI listesi (ikon + isim)
+  - [x] ScriptableObject item tanimlari
 
 ### Bonus (Nice to Have)
 
-- [ ] Animation entegrasyonu
-- [ ] Sound effects
-- [ ] Multiple keys / color-coded
-- [ ] Interaction highlight
-- [ ] Save/Load states
-- [ ] Chained interactions
-
----
-
-## Bilinen Limitasyonlar
-
-### Tamamlanamayan Ozellikler
-(Proje ilerledikce guncellenecek)
-
-### Bilinen Bug'lar
-(Test asamasinda guncellenecek)
-
-### Iyilestirme Onerileri
-(Proje sonunda guncellenecek)
+- [x] Animation entegrasyonu (+3) - Kapi rotasyon, sandik kapak, lever hareket
+- [x] Sound effects integration (+2) - ScriptableObject tabanli ses profilleri
+- [x] Multiple keys / color-coded (+2) - Red, Blue, Gold key turleri
+- [x] Interaction highlight (+3) - Emission pulse efekti
+- [x] Save/Load states (+3) - JSON + PlayerPrefs
+- [x] Chained interactions (+2) - Switch -> Door UnityEvent baglantisi
 
 ---
 
@@ -222,21 +202,29 @@ Assets/
 │   │   │   ├── Core/
 │   │   │   │   ├── IInteractable.cs
 │   │   │   │   ├── InteractionType.cs
-│   │   │   │   └── InteractionData.cs
+│   │   │   │   ├── KeyType.cs
+│   │   │   │   ├── ItemData.cs
+│   │   │   │   ├── KeyItemData.cs
+│   │   │   │   ├── InteractionHighlight.cs
+│   │   │   │   ├── InteractionSoundData.cs
+│   │   │   │   ├── InteractionSoundPlayer.cs
+│   │   │   │   └── InteractionSaveSystem.cs
 │   │   │   ├── Interactables/
 │   │   │   │   ├── Door.cs
 │   │   │   │   ├── KeyPickup.cs
 │   │   │   │   ├── Switch.cs
 │   │   │   │   └── Chest.cs
 │   │   │   ├── Player/
+│   │   │   │   ├── SimplePlayerController.cs
 │   │   │   │   ├── InteractionDetector.cs
 │   │   │   │   └── PlayerInventory.cs
 │   │   │   └── UI/
 │   │   │       ├── InteractionPromptUI.cs
-│   │   │       └── HoldProgressBarUI.cs
+│   │   │       ├── HoldProgressBarUI.cs
+│   │   │       ├── InventoryUI.cs
+│   │   │       └── InventorySlotUI.cs
 │   │   └── Editor/
-│   ├── ScriptableObjects/
-│   │   └── Items/
+│   ├── ScriptableObjects/Items/
 │   ├── Prefabs/
 │   │   ├── Interactables/
 │   │   ├── UI/
@@ -244,24 +232,25 @@ Assets/
 │   ├── Materials/
 │   └── Scenes/
 │       └── TestScene.unity
-├── Docs/
-│   ├── CSharp_Coding_Conventions.md
-│   ├── Naming_Convention_Kilavuzu.md
-│   └── Prefab_Asset_Kurallari.md
-├── README.md
-├── PROMPTS.md
-└── .gitignore
+Docs/
+├── CSharp_Coding_Conventions.md
+├── Naming_Convention_Kilavuzu.md
+└── Prefab_Asset_Kurallari.md
+README.md
+PROMPTS.md
+.gitignore
 ```
 
 ---
-## İletişim
 
-| Bilgi | Değer |
-|-------|-------|
-| Ad Soyad | [Tolga Yıldız] |
-| E-posta | [tolgayilddiz@gmail.com] |
-| LinkedIn | [https://www.linkedin.com/in/tolgayilddiz/] |
-| GitHub | [github.com/Togiylz] |
+## Bilinen Limitasyonlar
+
+### Iyilestirme Onerileri
+- Save sistemi PlayerPrefs yerine dosya tabanli olabilir
+- Envanter sistemi stack/miktar destegi eklenebilir
+- Object pooling ile pickup nesneleri optimize edilebilir
+- Highlight icin outline shader daha iyi gorsel sonuc verir
 
 ---
+
 *Bu proje Ludu Arts Unity Developer Intern Case icin hazirlanmistir.*

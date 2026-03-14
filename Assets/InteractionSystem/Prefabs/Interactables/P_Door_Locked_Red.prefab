@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &529317210064260561
+--- !u!1 &7882608387589081045
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,10 +8,60 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 136458355909467699}
-  - component: {fileID: 1557214958866419366}
-  - component: {fileID: 687417664079125053}
-  - component: {fileID: 6385729725577266065}
+  - component: {fileID: 669788091525888613}
+  - component: {fileID: 4519223782826559418}
+  m_Layer: 0
+  m_Name: P_Door_Locked_Red
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &669788091525888613
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7882608387589081045}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.26, y: 1.472, z: 5.054}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 8436621459268509067}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4519223782826559418
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7882608387589081045}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1e6ee84076dc5c4488d43087380764f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_OpenAngle: 90
+  m_Pivot: {fileID: 8436621459268509067}
+  m_IsLocked: 1
+  m_RequiredKeyType: 0
+  m_ConsumeKeyOnUnlock: 0
+--- !u!1 &8996706280277881266
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5949211124791002976}
+  - component: {fileID: 4885980796232869071}
+  - component: {fileID: 453507064289864363}
+  - component: {fileID: 2176304732066379722}
   m_Layer: 0
   m_Name: Vusual
   m_TagString: Untagged
@@ -19,36 +69,36 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &136458355909467699
+--- !u!4 &5949211124791002976
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 529317210064260561}
+  m_GameObject: {fileID: 8996706280277881266}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.24, y: -0.24, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.5, y: -0.07000002, z: 0}
   m_LocalScale: {x: 1, y: 2.5, z: 0.2}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 8710753872084332319}
+  m_Father: {fileID: 8436621459268509067}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &1557214958866419366
+--- !u!33 &4885980796232869071
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 529317210064260561}
+  m_GameObject: {fileID: 8996706280277881266}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!23 &687417664079125053
+--- !u!23 &453507064289864363
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 529317210064260561}
+  m_GameObject: {fileID: 8996706280277881266}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -87,13 +137,13 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &6385729725577266065
+--- !u!65 &2176304732066379722
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 529317210064260561}
+  m_GameObject: {fileID: 8996706280277881266}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -108,7 +158,7 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!1 &6839411779766311290
+--- !u!1 &9098498480366779734
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -116,45 +166,27 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 8710753872084332319}
-  - component: {fileID: 3661598568102743894}
+  - component: {fileID: 8436621459268509067}
   m_Layer: 0
-  m_Name: P_Door_Locked_Red
+  m_Name: DoorPivot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &8710753872084332319
+--- !u!4 &8436621459268509067
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6839411779766311290}
+  m_GameObject: {fileID: 9098498480366779734}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.25, y: 1.472, z: 5.054}
+  m_LocalPosition: {x: -0.26, y: -0.16, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 136458355909467699}
-  m_Father: {fileID: 0}
+  - {fileID: 5949211124791002976}
+  m_Father: {fileID: 669788091525888613}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3661598568102743894
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6839411779766311290}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d1e6ee84076dc5c4488d43087380764f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_OpenAngle: 90
-  m_Pivot: {fileID: 136458355909467699}
-  m_IsLocked: 1
-  m_RequiredKeyType: 0
-  m_ConsumeKeyOnUnlock: 0

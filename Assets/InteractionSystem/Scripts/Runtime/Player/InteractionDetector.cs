@@ -14,6 +14,7 @@ namespace InteractionSystem.Runtime
         #region Fields
 
         private const float k_SphereCastRadius = 0.15f;
+        private const float k_OutOfRangeMultiplier = 2f;
 
         [Header("Detection Settings")]
         [SerializeField] private float m_InteractionRange = 3f;
@@ -24,6 +25,7 @@ namespace InteractionSystem.Runtime
         [SerializeField] private Key m_InteractionKey = Key.E;
 
         private IInteractable m_CurrentTarget;
+        private IInteractable m_OutOfRangeTarget;
         private float m_HoldTimer;
         private bool m_IsHolding;
         private Camera m_Camera;
@@ -38,6 +40,12 @@ namespace InteractionSystem.Runtime
         /// Parametre null ise hedef kaybolmustur.
         /// </summary>
         public event Action<IInteractable> OnTargetChanged;
+
+        /// <summary>
+        /// Menzil disindaki bir etkilesim nesnesi tespit edildiginde tetiklenir.
+        /// Parametre null ise menzil disinda nesne yoktur.
+        /// </summary>
+        public event Action<IInteractable> OnOutOfRangeTargetChanged;
 
         /// <summary>
         /// Hold tipi etkilesimde ilerleme degistiginde tetiklenir.
@@ -58,6 +66,11 @@ namespace InteractionSystem.Runtime
         /// Su an odaklanilan IInteractable nesnesi. Yoksa null.
         /// </summary>
         public IInteractable CurrentTarget => m_CurrentTarget;
+
+        /// <summary>
+        /// Menzil disindaki IInteractable nesnesi. Yoksa null.
+        /// </summary>
+        public IInteractable OutOfRangeTarget => m_OutOfRangeTarget;
 
         /// <summary>
         /// Etkilesim menzili (metre).
@@ -106,17 +119,34 @@ namespace InteractionSystem.Runtime
         private void DetectInteractable()
         {
             IInteractable detected = null;
+            bool isInRange = false;
+            float detectionRange = m_InteractionRange * k_OutOfRangeMultiplier;
 
             Ray ray = new Ray(m_RaycastOrigin.position, m_RaycastOrigin.forward);
 
-            if (Physics.SphereCast(ray, k_SphereCastRadius, out RaycastHit hit, m_InteractionRange, m_InteractionLayer))
+            if (Physics.SphereCast(ray, k_SphereCastRadius, out RaycastHit hit, detectionRange, m_InteractionLayer))
             {
                 detected = hit.collider.GetComponentInParent<IInteractable>();
+
+                if (detected != null)
+                    isInRange = hit.distance <= m_InteractionRange;
             }
 
-            if (detected != m_CurrentTarget)
+            if (isInRange)
             {
-                SetTarget(detected);
+                if (detected != m_CurrentTarget)
+                    SetTarget(detected);
+
+                if (m_OutOfRangeTarget != null)
+                    SetOutOfRangeTarget(null);
+            }
+            else
+            {
+                if (m_CurrentTarget != null)
+                    SetTarget(null);
+
+                if (detected != m_OutOfRangeTarget)
+                    SetOutOfRangeTarget(detected);
             }
         }
 
@@ -137,6 +167,12 @@ namespace InteractionSystem.Runtime
             }
 
             OnTargetChanged?.Invoke(m_CurrentTarget);
+        }
+
+        private void SetOutOfRangeTarget(IInteractable newTarget)
+        {
+            m_OutOfRangeTarget = newTarget;
+            OnOutOfRangeTargetChanged?.Invoke(m_OutOfRangeTarget);
         }
 
         private void HandleInput()

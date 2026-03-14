@@ -19,6 +19,9 @@ namespace InteractionSystem.Runtime
         [SerializeField] private TextMeshProUGUI m_CannotInteractText;
         [SerializeField] private HoldProgressBarUI m_HoldProgressBar;
 
+        [Header("Out of Range")]
+        [SerializeField] private TextMeshProUGUI m_OutOfRangeText;
+
         private IInteractable m_LastTarget;
 
         #endregion
@@ -42,6 +45,7 @@ namespace InteractionSystem.Runtime
                 return;
 
             m_Detector.OnTargetChanged += HandleTargetChanged;
+            m_Detector.OnOutOfRangeTargetChanged += HandleOutOfRangeChanged;
             m_Detector.OnHoldProgress += HandleHoldProgress;
             m_Detector.OnInteractionCompleted += HandleInteractionCompleted;
         }
@@ -52,6 +56,7 @@ namespace InteractionSystem.Runtime
                 return;
 
             m_Detector.OnTargetChanged -= HandleTargetChanged;
+            m_Detector.OnOutOfRangeTargetChanged -= HandleOutOfRangeChanged;
             m_Detector.OnHoldProgress -= HandleHoldProgress;
             m_Detector.OnInteractionCompleted -= HandleInteractionCompleted;
         }
@@ -71,14 +76,30 @@ namespace InteractionSystem.Runtime
 
             if (target == null)
             {
-                HideAll();
+                HidePrompt();
                 return;
             }
+
+            HideOutOfRange();
 
             if (m_PromptPanel != null)
                 m_PromptPanel.SetActive(true);
 
             UpdatePromptText();
+        }
+
+        private void HandleOutOfRangeChanged(IInteractable target)
+        {
+            if (m_LastTarget != null)
+                return;
+
+            if (target == null)
+            {
+                HideOutOfRange();
+                return;
+            }
+
+            ShowOutOfRange(target.GetPromptMessage());
         }
 
         private void HandleHoldProgress(float progress)
@@ -137,7 +158,31 @@ namespace InteractionSystem.Runtime
             }
         }
 
-        private void HideAll()
+        private void ShowOutOfRange(string objectName)
+        {
+            if (m_PromptPanel != null)
+                m_PromptPanel.SetActive(true);
+
+            if (m_OutOfRangeText != null)
+            {
+                m_OutOfRangeText.gameObject.SetActive(true);
+                m_OutOfRangeText.text = $"Too Far - {objectName}";
+            }
+
+            if (m_PromptText != null)
+                m_PromptText.gameObject.SetActive(false);
+
+            if (m_CannotInteractText != null)
+                m_CannotInteractText.gameObject.SetActive(false);
+        }
+
+        private void HideOutOfRange()
+        {
+            if (m_OutOfRangeText != null)
+                m_OutOfRangeText.gameObject.SetActive(false);
+        }
+
+        private void HidePrompt()
         {
             if (m_PromptPanel != null)
                 m_PromptPanel.SetActive(false);
@@ -150,6 +195,12 @@ namespace InteractionSystem.Runtime
 
             if (m_HoldProgressBar != null)
                 m_HoldProgressBar.Hide();
+        }
+
+        private void HideAll()
+        {
+            HidePrompt();
+            HideOutOfRange();
         }
 
         #endregion

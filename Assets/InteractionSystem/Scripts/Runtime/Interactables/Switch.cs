@@ -27,6 +27,8 @@ namespace InteractionSystem.Runtime
 
         private bool m_HasBeenUsed;
         private bool m_IsFocused;
+        private InteractionHighlight m_Highlight;
+        private InteractionSoundPlayer m_SoundPlayer;
 
         #endregion
 
@@ -49,6 +51,12 @@ namespace InteractionSystem.Runtime
         #endregion
 
         #region Unity Methods
+
+        private void Awake()
+        {
+            m_Highlight = GetComponent<InteractionHighlight>();
+            m_SoundPlayer = GetComponent<InteractionSoundPlayer>();
+        }
 
         private void Start()
         {
@@ -76,6 +84,8 @@ namespace InteractionSystem.Runtime
             m_HasBeenUsed = true;
 
             UpdateVisual();
+
+            if (m_SoundPlayer != null) m_SoundPlayer.PlayInteract();
 
             if (m_IsOn)
             {
@@ -132,11 +142,14 @@ namespace InteractionSystem.Runtime
         void IInteractable.OnFocusBegin()
         {
             m_IsFocused = true;
+            if (m_Highlight != null) m_Highlight.SetHighlight(true);
+            if (m_SoundPlayer != null) m_SoundPlayer.PlayFocus();
         }
 
         void IInteractable.OnFocusEnd()
         {
             m_IsFocused = false;
+            if (m_Highlight != null) m_Highlight.SetHighlight(false);
         }
 
         #endregion
