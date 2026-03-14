@@ -269,10 +269,9 @@ PROMPTS.md
 | Bilgi | Değer |
 |-------|-------|
 | Ad Soyad | [Tolga Yıldız] |
-| E-posta | [email@
-example.com] |
-| LinkedIn | [profil linki] |
-| GitHub | [github.com/username] |
+| E-posta | [tolgayilddiz@gmail.com] |
+| LinkedIn | [https://www.linkedin.com/in/tolgayilddiz/] |
+| GitHub | [https://github.com/Togiylz] |
 
 
 ---
