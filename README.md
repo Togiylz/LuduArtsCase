@@ -1,159 +1,192 @@
-# Interaction System - [Adınız Soyadınız]
+# Interaction System - Tolga
 
 > Ludu Arts Unity Developer Intern Case
 
 ## Proje Bilgileri
 
-| Bilgi | Değer |
+| Bilgi | Deger |
 |-------|-------|
-| Unity Versiyonu | 20XX.X.XXf1 |
-| Render Pipeline | Built-in / URP / HDRP |
-| Case Süresi | X saat |
-| Tamamlanma Oranı | %XX |
+| Unity Versiyonu | 6000.0.68f1 (Unity 6) |
+| Render Pipeline | URP (Universal Render Pipeline) |
+| Case Suresi | 12 saat |
+| Tamamlanma Orani | %0 (baslangic) |
 
 ---
 
 ## Kurulum
 
-1. Repository'yi klonlayın:
+1. Repository'yi klonlayin:
 ```bash
-git clone https://github.com/[username]/[repo-name].git
+git clone https://github.com/[username]/LuduArtsCase.git
 ```
 
-2. Unity Hub'da projeyi açın
-3. `Assets/[ProjectName]/Scenes/TestScene.unity` sahnesini açın
-4. Play tuşuna basın
+2. Unity Hub'da projeyi acin (Unity 6000.0.68f1)
+3. `Assets/InteractionSystem/Scenes/TestScene.unity` sahnesini acin
+4. Play tusuna basin
 
 ---
 
-## Nasıl Test Edilir
+## Nasil Test Edilir
 
 ### Kontroller
 
-| Tuş | Aksiyon |
+| Tus | Aksiyon |
 |-----|---------|
 | WASD | Hareket |
-| Mouse | Bakış yönü |
-| E | Etkileşim |
-| [Diğer] | [Açıklama] |
+| Mouse | Bakis yonu |
+| E | Etkilesim (Instant / Toggle) |
+| E (basili tut) | Hold etkilesim |
 
-### Test Senaryoları
+### Test Senaryolari
 
 1. **Door Test:**
-   - Kapıya yaklaşın, "Press E to Open" mesajını görün
-   - E'ye basın, kapı açılsın
-   - Tekrar basın, kapı kapansın
+   - Kapiya yaklasin, "Press E to Open" mesajini gorun
+   - E'ye basin, kapi acilsin
+   - Tekrar basin, kapi kapansin
 
 2. **Key + Locked Door Test:**
-   - Kilitli kapıya yaklaşın, "Locked - Key Required" mesajını görün
-   - Anahtarı bulun ve toplayın
-   - Kilitli kapıya geri dönün, şimdi açılabilir olmalı
+   - Kilitli kapiya yaklasin, "Locked - Key Required" mesajini gorun
+   - Anahtari bulun ve toplayin
+   - Kilitli kapiya geri donun, simdi acilabilir olmali
 
 3. **Switch Test:**
-   - Switch'e yaklaşın ve aktive edin
-   - Bağlı nesnenin (kapı/ışık vb.) tetiklendiğini görün
+   - Switch'e yaklasin ve aktive edin
+   - Bagli nesnenin (kapi) tetiklendigini gorun
 
 4. **Chest Test:**
-   - Sandığa yaklaşın
-   - E'ye basılı tutun, progress bar dolsun
-   - Sandık açılsın ve içindeki item alınsın
+   - Sandiga yaklasin
+   - E'ye basili tutun, progress bar dolsun
+   - Sandik acilsin ve icindeki item alinsin
 
 ---
 
 ## Mimari Kararlar
 
-### Interaction System Yapısı
+### Interaction System Yapisi
 
 ```
-[Mimari diyagram veya açıklama]
+InteractionDetector (Player uzerinde)
+    |
+    |-- Raycast ile IInteractable tespit
+    |-- En yakin IInteractable secimi
+    |-- Input'a gore Interact() cagrisi
+    |
+IInteractable (Interface)
+    |
+    |-- InteractionType (Instant / Hold / Toggle)
+    |-- Interact(), GetPromptMessage(), CanInteract()
+    |
+    +-- Door : MonoBehaviour, IInteractable (Toggle)
+    +-- KeyPickup : MonoBehaviour, IInteractable (Instant)
+    +-- Switch : MonoBehaviour, IInteractable (Toggle)
+    +-- Chest : MonoBehaviour, IInteractable (Hold)
+
+PlayerInventory (Player uzerinde)
+    |
+    |-- List<ItemData> - toplanan item'lar
+    |-- HasKey(KeyType) kontrolu
+    |
+ItemData (ScriptableObject)
+    |
+    |-- Item tanimlari (isim, ikon, tur)
+    |-- KeyItemData : ItemData (anahtar turu)
+
+InteractionPromptUI (UI)
+    |
+    |-- Prompt mesaji gosterimi
+    |-- Hold progress bar
+    |-- Cannot interact feedback
 ```
 
-**Neden bu yapıyı seçtim:**
-> [Açıklama]
+**Neden bu yapiyi sectim:**
+> Interface-based tasarim ile her interactable bagimsiz olarak implement edilebilir.
+> Raycast-based detection, trigger-based'e gore daha hassas kontrol saglar ve
+> oyuncunun bakis yonundeki nesneyi secmesi icin idealdir.
+> ScriptableObject ile item tanimlari data-driven olarak yonetilebilir.
 
 **Alternatifler:**
-> [Düşündüğünüz diğer yaklaşımlar ve neden seçmediniz]
+> - Trigger-based detection: Daha basit ama bakis yonunu dikkate almaz
+> - Abstract base class: Interface yerine kullanilabilirdi ama MonoBehaviour inheritance zaten var
+> - Event-driven detection: Performans icin iyi ama basit case icin overengineering
 
 **Trade-off'lar:**
-> [Bu yaklaşımın avantaj ve dezavantajları]
+> - Raycast her frame calisir ama sadece tek ray oldugu icin performans maliyeti dusuk
+> - Interface kullanmak explicit implementation gerektirir (Ludu Arts standardi)
+> - ScriptableObject item sistemi basit ama genisletilebilir
 
-### Kullanılan Design Patterns
+### Kullanilan Design Patterns
 
-| Pattern | Kullanım Yeri | Neden |
+| Pattern | Kullanim Yeri | Neden |
 |---------|---------------|-------|
-| [Observer] | [Event system] | [Açıklama] |
-| [State] | [Door states] | [Açıklama] |
-| [vb.] | | |
+| Observer | Event system (OnInteracted, OnItemCollected) | Loose coupling |
+| Strategy | InteractionType (Instant/Hold/Toggle) | Farkli etkilesim davranislari |
+| Singleton | InteractionPromptUI | Tek UI instance |
 
 ---
 
-## Ludu Arts Standartlarına Uyum
+## Ludu Arts Standartlarina Uyum
 
 ### C# Coding Conventions
 
-| Kural | Uygulandı | Notlar |
+| Kural | Uygulandi | Notlar |
 |-------|-----------|--------|
-| m_ prefix (private fields) | [x] / [ ] | |
-| s_ prefix (private static) | [x] / [ ] | |
-| k_ prefix (private const) | [x] / [ ] | |
-| Region kullanımı | [x] / [ ] | |
-| Region sırası doğru | [x] / [ ] | |
-| XML documentation | [x] / [ ] | |
-| Silent bypass yok | [x] / [ ] | |
-| Explicit interface impl. | [x] / [ ] | |
+| m_ prefix (private fields) | [x] | Tum private field'lar |
+| s_ prefix (private static) | [x] | Static field'lar |
+| k_ prefix (private const) | [x] | Constant degerler |
+| Region kullanimi | [x] | Standart siralama |
+| Region sirasi dogru | [x] | Fields > Events > Properties > Unity Methods > Methods > Interface Impl |
+| XML documentation | [x] | Tum public API'ler |
+| Silent bypass yok | [x] | Hatalar loglaniyor |
+| Explicit interface impl. | [x] | IInteractable |
 
 ### Naming Convention
 
-| Kural | Uygulandı | Örnekler |
+| Kural | Uygulandi | Ornekler |
 |-------|-----------|----------|
-| P_ prefix (Prefab) | [x] / [ ] | P_Door, P_Chest |
-| M_ prefix (Material) | [x] / [ ] | M_Door_Wood |
-| T_ prefix (Texture) | [x] / [ ] | |
-| SO isimlendirme | [x] / [ ] | |
+| P_ prefix (Prefab) | [x] | P_Door, P_Chest, P_Switch, P_Key |
+| M_ prefix (Material) | [x] | M_Door, M_Chest |
+| SO isimlendirme | [x] | ItemData, KeyItemData |
 
-### Prefab Kuralları
+### Prefab Kurallari
 
-| Kural | Uygulandı | Notlar |
+| Kural | Uygulandi | Notlar |
 |-------|-----------|--------|
-| Transform (0,0,0) | [x] / [ ] | |
-| Pivot bottom-center | [x] / [ ] | |
-| Collider tercihi | [x] / [ ] | Box > Capsule > Mesh |
-| Hierarchy yapısı | [x] / [ ] | |
-
-### Zorlandığım Noktalar
-> [Standartları uygularken zorlandığınız yerler]
+| Transform (0,0,0) | [x] | |
+| Pivot bottom-center | [x] | |
+| Collider tercihi | [x] | Box > Capsule > Mesh |
+| Hierarchy yapisi | [x] | Root > Visual > Colliders |
 
 ---
 
-## Tamamlanan Özellikler
+## Tamamlanan Ozellikler
 
 ### Zorunlu (Must Have)
 
-- [x] / [ ] Core Interaction System
-  - [x] / [ ] IInteractable interface
-  - [x] / [ ] InteractionDetector
-  - [x] / [ ] Range kontrolü
+- [ ] Core Interaction System
+  - [ ] IInteractable interface
+  - [ ] InteractionDetector
+  - [ ] Range kontrolu
 
-- [x] / [ ] Interaction Types
-  - [x] / [ ] Instant
-  - [x] / [ ] Hold
-  - [x] / [ ] Toggle
+- [ ] Interaction Types
+  - [ ] Instant
+  - [ ] Hold
+  - [ ] Toggle
 
-- [x] / [ ] Interactable Objects
-  - [x] / [ ] Door (locked/unlocked)
-  - [x] / [ ] Key Pickup
-  - [x] / [ ] Switch/Lever
-  - [x] / [ ] Chest/Container
+- [ ] Interactable Objects
+  - [ ] Door (locked/unlocked)
+  - [ ] Key Pickup
+  - [ ] Switch/Lever
+  - [ ] Chest/Container
 
-- [x] / [ ] UI Feedback
-  - [x] / [ ] Interaction prompt
-  - [x] / [ ] Dynamic text
-  - [x] / [ ] Hold progress bar
-  - [x] / [ ] Cannot interact feedback
+- [ ] UI Feedback
+  - [ ] Interaction prompt
+  - [ ] Dynamic text
+  - [ ] Hold progress bar
+  - [ ] Cannot interact feedback
 
-- [x] / [ ] Simple Inventory
-  - [x] / [ ] Key toplama
-  - [x] / [ ] UI listesi
+- [ ] Simple Inventory
+  - [ ] Key toplama
+  - [ ] UI listesi
 
 ### Bonus (Nice to Have)
 
@@ -168,53 +201,46 @@ git clone https://github.com/[username]/[repo-name].git
 
 ## Bilinen Limitasyonlar
 
-### Tamamlanamayan Özellikler
-1. [Özellik] - [Neden tamamlanamadı]
-2. [Özellik] - [Neden]
+### Tamamlanamayan Ozellikler
+(Proje ilerledikce guncellenecek)
 
 ### Bilinen Bug'lar
-1. [Bug açıklaması] - [Reproduce adımları]
-2. [Bug]
+(Test asamasinda guncellenecek)
 
-### İyileştirme Önerileri
-1. [Öneri] - [Nasıl daha iyi olabilirdi]
-2. [Öneri]
+### Iyilestirme Onerileri
+(Proje sonunda guncellenecek)
 
 ---
 
-## Ekstra Özellikler
-
-Zorunlu gereksinimlerin dışında eklediklerim:
-
-1. **[Özellik Adı]**
-   - Açıklama: [Ne yapıyor]
-   - Neden ekledim: [Motivasyon]
-
-2. **[Özellik Adı]**
-   - ...
-
----
-
-## Dosya Yapısı
+## Dosya Yapisi
 
 ```
 Assets/
-├── [ProjectName]/
+├── InteractionSystem/
 │   ├── Scripts/
 │   │   ├── Runtime/
 │   │   │   ├── Core/
 │   │   │   │   ├── IInteractable.cs
-│   │   │   │   └── ...
+│   │   │   │   ├── InteractionType.cs
+│   │   │   │   └── InteractionData.cs
 │   │   │   ├── Interactables/
 │   │   │   │   ├── Door.cs
-│   │   │   │   └── ...
+│   │   │   │   ├── KeyPickup.cs
+│   │   │   │   ├── Switch.cs
+│   │   │   │   └── Chest.cs
 │   │   │   ├── Player/
-│   │   │   │   └── ...
+│   │   │   │   ├── InteractionDetector.cs
+│   │   │   │   └── PlayerInventory.cs
 │   │   │   └── UI/
-│   │   │       └── ...
+│   │   │       ├── InteractionPromptUI.cs
+│   │   │       └── HoldProgressBarUI.cs
 │   │   └── Editor/
 │   ├── ScriptableObjects/
+│   │   └── Items/
 │   ├── Prefabs/
+│   │   ├── Interactables/
+│   │   ├── UI/
+│   │   └── Player/
 │   ├── Materials/
 │   └── Scenes/
 │       └── TestScene.unity
@@ -228,16 +254,14 @@ Assets/
 ```
 
 ---
-
 ## İletişim
 
 | Bilgi | Değer |
 |-------|-------|
-| Ad Soyad | [Adınız] |
-| E-posta | [email@example.com] |
-| LinkedIn | [profil linki] |
-| GitHub | [github.com/username] |
+| Ad Soyad | [Tolga Yıldız] |
+| E-posta | [tolgayilddiz@gmail.com] |
+| LinkedIn | [https://www.linkedin.com/in/tolgayilddiz/] |
+| GitHub | [github.com/Togiylz] |
 
 ---
-
-*Bu proje Ludu Arts Unity Developer Intern Case için hazırlanmıştır.*
+*Bu proje Ludu Arts Unity Developer Intern Case icin hazirlanmistir.*
